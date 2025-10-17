@@ -215,7 +215,6 @@ class ProfileEditorDialog(ctk.CTkToplevel):
             self.name_var.set(self.profile.name)
             self.json_text.insert("1.0", self.profile.config_json)
             self._update_line_numbers()
-            self._apply_syntax_highlighting()
 
     def _load_template(self, template_name: str):
         """Load a configuration template."""
@@ -358,7 +357,6 @@ class ProfileEditorDialog(ctk.CTkToplevel):
                         self.json_text.delete("1.0", "end")
                         self.json_text.insert("1.0", content)
                         self._update_line_numbers()
-                        self._apply_syntax_highlighting()
 
                     self.status_label.configure(text="Auth tokens masked", text_color=("green", "green"))
 

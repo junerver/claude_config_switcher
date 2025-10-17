@@ -6,10 +6,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
-from ..models.profile import Profile
-from ..storage.database import Database
-from ..utils.logger import get_logger
-from ..utils.exceptions import (
+from models.profile import Profile
+from storage.database import Database
+from utils.logger import get_logger
+from utils.exceptions import (
     ProfileError, ProfileNotFoundError, ProfileAlreadyExistsError,
     ActiveProfileProtectedError, ValidationError, DatabaseError
 )

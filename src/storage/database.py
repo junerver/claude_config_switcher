@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from contextlib import contextmanager
 
-from ..utils.logger import get_logger
+from utils.logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -8,9 +8,9 @@ import customtkinter as ctk
 from typing import Optional, Dict, Any
 import json
 
-from ...models.profile import Profile
-from ...utils.logger import get_logger
-from ...utils.exceptions import ValidationError, InvalidJSONError
+from models.profile import Profile
+from utils.logger import get_logger
+from utils.exceptions import ValidationError, InvalidJSONError
 
 logger = get_logger(__name__)
 
@@ -129,9 +129,6 @@ class ProfileEditorDialog(ctk.CTkToplevel):
         )
         self.json_text.pack(side="left", fill="both", expand=True)
 
-        # Configure text tags for syntax highlighting
-        self._setup_syntax_highlighting()
-
         # Bind events
         self.json_text.bind("<KeyRelease>", self._on_text_change)
         self.json_text.bind("<Button-1>", self._on_text_change)
@@ -210,15 +207,7 @@ class ProfileEditorDialog(ctk.CTkToplevel):
         # Initial line numbers update
         self._update_line_numbers()
 
-    def _setup_syntax_highlighting(self):
-        """Setup syntax highlighting for JSON."""
-        # Configure tags for different JSON elements
-        self.json_text.tag_configure("json_string", foreground=("#00a000", "#00ff00"))
-        self.json_text.tag_configure("json_number", foreground=("#0000ff", "#0080ff"))
-        self.json_text.tag_configure("json_boolean", foreground=("#ff0000", "#ff4040"))
-        self.json_text.tag_configure("json_null", foreground=("#808080", "#b0b0b0"))
-        self.json_text.tag_configure("json_key", foreground=("#000000", "#ffffff"), font=ctk.CTkFont(weight="bold"))
-        self.json_text.tag_configure("json_bracket", foreground=("#000000", "#ffffff"))
+    # Syntax highlighting removed - CustomTkinter CTkTextbox doesn't support tag_configure
 
     def _load_profile_data(self):
         """Load existing profile data into form."""
@@ -266,13 +255,11 @@ class ProfileEditorDialog(ctk.CTkToplevel):
             self.json_text.delete("1.0", "end")
             self.json_text.insert("1.0", template_content)
             self._update_line_numbers()
-            self._apply_syntax_highlighting()
             self.status_label.configure(text=f"Loaded {template_name} template", text_color=("green", "green"))
 
     def _on_text_change(self, event=None):
         """Handle text change events."""
         self._update_line_numbers()
-        self._apply_syntax_highlighting()
 
     def _update_line_numbers(self):
         """Update line numbers display."""
@@ -289,59 +276,7 @@ class ProfileEditorDialog(ctk.CTkToplevel):
         self.line_numbers.insert("1.0", line_numbers)
         self.line_numbers.configure(state="disabled")
 
-    def _apply_syntax_highlighting(self):
-        """Apply syntax highlighting to JSON content."""
-        # Clear existing tags
-        for tag in ["json_string", "json_number", "json_boolean", "json_null", "json_key", "json_bracket"]:
-            self.json_text.tag_remove(tag, "1.0", "end")
-
-        # Get content
-        content = self.json_text.get("1.0", "end-1c")
-
-        try:
-            # Simple syntax highlighting for JSON
-            in_string = False
-            escape_next = False
-
-            i = 0
-            while i < len(content):
-                char = content[i]
-
-                if escape_next:
-                    escape_next = False
-                    i += 1
-                    continue
-
-                if char == '\\' and in_string:
-                    escape_next = True
-                    i += 1
-                    continue
-
-                if char == '"' and not escape_next:
-                    if in_string:
-                        # End of string
-                        self.json_text.tag_add("json_string", f"1.0+{i - self._get_string_start(content, i)}c", f"1.0+{i + 1}c")
-                        in_string = False
-                    else:
-                        # Start of string
-                        self._string_start = i
-                        in_string = True
-                elif not in_string:
-                    if char in '{}[],:':
-                        self.json_text.tag_add("json_bracket", f"1.0+{i}c", f"1.0+{i + 1}c")
-                    elif char.isnumeric() or (char == '-' and i + 1 < len(content) and content[i + 1].isnumeric()):
-                        # Number
-                        start = i
-                        while i < len(content) and (content[i].isnumeric() or content[i] == '.' or content[i] == '-'):
-                            i += 1
-                        self.json_text.tag_add("json_number", f"1.0+{start}c", f"1.0+{i}c")
-                        continue
-
-                i += 1
-
-        except Exception:
-            # If syntax highlighting fails, continue without it
-            pass
+    # Syntax highlighting methods removed - CustomTkinter doesn't support text tagging
 
     def _get_string_start(self, content, current_pos):
         """Get the start position of the current string."""
@@ -392,9 +327,8 @@ class ProfileEditorDialog(ctk.CTkToplevel):
             self.json_text.delete("1.0", "end")
             self.json_text.insert("1.0", formatted)
 
-            # Update line numbers and highlighting
+            # Update line numbers
             self._update_line_numbers()
-            self._apply_syntax_highlighting()
 
             self.status_label.configure(text="✓ JSON formatted", text_color=("green", "green"))
 

@@ -8,15 +8,15 @@ import customtkinter as ctk
 from pathlib import Path
 from typing import Optional
 
-from ..services.profile_service import ProfileService
-from ..services.config_service import ConfigService
-from ..models.config import AppConfig
-from ..utils.logger import get_logger
-from ..utils.exceptions import ConfigSwitcherError
-from ..utils.environment import setup_environment
-from .widgets.profile_list import ProfileListWidget
-from .widgets.settings_dialog import SettingsDialog
-from .widgets.profile_editor import ProfileEditorDialog
+from services.profile_service import ProfileService
+from services.config_service import ConfigService
+from models.config import AppConfig
+from utils.logger import get_logger
+from utils.exceptions import ConfigSwitcherError
+from utils.environment import setup_environment
+from gui.widgets.profile_list import ProfileListWidget
+from gui.widgets.settings_dialog import SettingsDialog
+from gui.widgets.profile_editor import ProfileEditorDialog
 
 logger = get_logger(__name__)
 
@@ -59,7 +59,8 @@ class Application(ctk.CTk):
 
     def _setup_window(self):
         """Setup main window properties."""
-        self.title("Claude Code Configuration Switcher")
+        # Put path info in window title
+        self.title(f"Claude Code Config Switcher - {self.claude_config_path}")
         self.geometry(f"{self.app_config.window_width}x{self.app_config.window_height}")
         self.minsize(600, 400)
 
@@ -77,30 +78,8 @@ class Application(ctk.CTk):
 
     def _create_widgets(self):
         """Create main window widgets."""
-        # Top frame for header
-        self.header_frame = ctk.CTkFrame(self)
-        self.header_frame.pack(fill="x", padx=10, pady=(10, 5))
-
-        # Claude Code path label
-        self.path_label = ctk.CTkLabel(
-            self.header_frame,
-            text=f"Claude Code: {self.claude_config_path}",
-            font=ctk.CTkFont(size=12, weight="bold")
-        )
-        self.path_label.pack(side="left", padx=10, pady=10)
-
-        # Settings button (gear icon placeholder - text for now)
-        self.settings_button = ctk.CTkButton(
-            self.header_frame,
-            text="⚙️",
-            width=40,
-            command=self._show_settings_dialog
-        )
-        self.settings_button.pack(side="right", padx=10, pady=10)
-
-        # Main content frame
+        # Main content frame - 直接作为主容器
         self.content_frame = ctk.CTkFrame(self)
-        self.content_frame.pack(fill="both", expand=True, padx=10, pady=5)
 
         # Profile list widget
         self.profile_list = ProfileListWidget(
@@ -113,7 +92,6 @@ class Application(ctk.CTk):
 
         # Bottom frame for action buttons
         self.action_frame = ctk.CTkFrame(self)
-        self.action_frame.pack(fill="x", padx=10, pady=(5, 10))
 
         # Create profile button
         self.create_button = ctk.CTkButton(
@@ -121,7 +99,7 @@ class Application(ctk.CTk):
             text="Create Profile",
             command=self._create_profile
         )
-        self.create_button.pack(side="left", padx=10, pady=10)
+        self.create_button.grid(row=0, column=0, padx=1, pady=1)
 
         # Edit profile button
         self.edit_button = ctk.CTkButton(
@@ -130,7 +108,7 @@ class Application(ctk.CTk):
             command=self._edit_profile,
             state="disabled"
         )
-        self.edit_button.pack(side="left", padx=5, pady=10)
+        self.edit_button.grid(row=0, column=1, padx=1, pady=1)
 
         # Delete profile button
         self.delete_button = ctk.CTkButton(
@@ -139,7 +117,7 @@ class Application(ctk.CTk):
             command=self._delete_profile,
             state="disabled"
         )
-        self.delete_button.pack(side="left", padx=5, pady=10)
+        self.delete_button.grid(row=0, column=2, padx=1, pady=1)
 
         # Duplicate profile button
         self.duplicate_button = ctk.CTkButton(
@@ -148,7 +126,7 @@ class Application(ctk.CTk):
             command=self._duplicate_profile,
             state="disabled"
         )
-        self.duplicate_button.pack(side="left", padx=5, pady=10)
+        self.duplicate_button.grid(row=0, column=3, padx=1, pady=1)
 
         # Refresh button
         self.refresh_button = ctk.CTkButton(
@@ -156,7 +134,16 @@ class Application(ctk.CTk):
             text="Refresh",
             command=self._refresh_profiles
         )
-        self.refresh_button.pack(side="right", padx=10, pady=10)
+        self.refresh_button.grid(row=0, column=4, padx=1, pady=1)
+
+        # Settings button
+        self.settings_button = ctk.CTkButton(
+            self.action_frame,
+            text="⚙️",
+            width=25,
+            command=self._show_settings_dialog
+        )
+        self.settings_button.grid(row=0, column=5, padx=1, pady=1)
 
     def _setup_layout(self):
         """Setup widget layout."""
@@ -164,17 +151,22 @@ class Application(ctk.CTk):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # Header frame
-        self.header_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-        self.header_frame.grid_columnconfigure(0, weight=1)
-
-        # Content frame with profile list
-        self.content_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
+        # Content frame with profile list - 占用主要空间
+        self.content_frame.grid(row=0, column=0, sticky="nsew", padx=0, pady=0)
         self.content_frame.grid_columnconfigure(0, weight=1)
         self.content_frame.grid_rowconfigure(0, weight=1)
 
-        # Action frame
-        self.action_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
+        # Profile list widget should fill the content frame
+        self.profile_list.grid(row=0, column=0, sticky="nsew", padx=0, pady=0)
+
+        # Action frame - 底部按钮
+        self.action_frame.grid(row=1, column=0, sticky="ew", padx=0, pady=0)
+        self.action_frame.grid_columnconfigure(0, weight=1)  # Create button
+        self.action_frame.grid_columnconfigure(1, weight=0)  # Edit button
+        self.action_frame.grid_columnconfigure(2, weight=0)  # Delete button
+        self.action_frame.grid_columnconfigure(3, weight=0)  # Duplicate button
+        self.action_frame.grid_columnconfigure(4, weight=0)  # Refresh button
+        self.action_frame.grid_columnconfigure(5, weight=0)  # Settings button
 
     def _load_profiles(self):
         """Load and display profiles."""

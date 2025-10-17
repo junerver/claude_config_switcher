@@ -8,10 +8,10 @@ import customtkinter as ctk
 from pathlib import Path
 from typing import Optional
 
-from ...models.config import AppConfig
-from ...utils.logger import get_logger
-from ...utils.paths import detect_claude_config_path
-from ...utils.exceptions import ConfigSwitcherError
+from models.config import AppConfig
+from utils.logger import get_logger
+from utils.paths import detect_claude_config_path
+from utils.exceptions import ConfigSwitcherError
 
 logger = get_logger(__name__)
 

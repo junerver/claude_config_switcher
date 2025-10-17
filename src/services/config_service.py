@@ -10,9 +10,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from ..utils.logger import get_logger
-from ..utils.paths import detect_claude_config_path, get_default_backup_directory
-from ..utils.exceptions import (
+from utils.logger import get_logger
+from utils.paths import detect_claude_config_path, get_default_backup_directory
+from utils.exceptions import (
     ConfigServiceError, ConfigNotFoundError, PermissionError,
     BackupError, ValidationError, InvalidJSONError
 )

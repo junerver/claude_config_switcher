@@ -8,12 +8,12 @@ import customtkinter as ctk
 from typing import Optional, Callable, List
 import json
 
-from ...models.profile import Profile
-from ...services.profile_service import ProfileService
-from ...services.config_service import ConfigService
-from ...utils.logger import get_logger
-from ...utils.exceptions import ConfigSwitcherError
-from .profile_preview import ProfilePreviewDialog
+from models.profile import Profile
+from services.profile_service import ProfileService
+from services.config_service import ConfigService
+from utils.logger import get_logger
+from utils.exceptions import ConfigSwitcherError
+from gui.widgets.profile_preview import ProfilePreviewDialog
 
 logger = get_logger(__name__)
 
@@ -55,10 +55,12 @@ class ProfileListWidget(ctk.CTkFrame):
         """Create widget components."""
         # Scrollable frame for profile list
         self.scroll_frame = ctk.CTkScrollableFrame(self)
-        self.scroll_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
         # Profile item frames will be added dynamically
         self.profile_frames: List[ctk.CTkFrame] = []
+
+        # Bind mouse wheel events to the scrollable frame
+        self._bind_mousewheel()
 
     def _setup_layout(self):
         """Setup widget layout."""
@@ -66,6 +68,70 @@ class ProfileListWidget(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
 
         self.scroll_frame.grid(row=0, column=0, sticky="nsew")
+
+        # Set a minimum height for the scrollable frame to ensure it's visible
+        self.scroll_frame.configure(height=200)
+
+    def _bind_mousewheel(self):
+        """Bind mouse wheel events to the scrollable frame."""
+        # Try to access the internal canvas for mouse wheel binding
+        try:
+            # CTkScrollableFrame has an internal _canvas attribute
+            canvas = self.scroll_frame._canvas
+
+            # Bind mouse wheel events for Windows
+            canvas.bind("<MouseWheel>", self._on_mousewheel)
+
+            # Bind mouse wheel events for Linux
+            canvas.bind("<Button-4>", self._on_mousewheel_linux)
+            canvas.bind("<Button-5>", self._on_mousewheel_linux)
+
+            # Also bind to the scrollable frame itself
+            self.scroll_frame.bind("<MouseWheel>", self._on_mousewheel)
+            self.scroll_frame.bind("<Button-4>", self._on_mousewheel_linux)
+            self.scroll_frame.bind("<Button-5>", self._on_mousewheel_linux)
+
+        except AttributeError:
+            # If internal canvas is not accessible, just bind to the frame
+            self.scroll_frame.bind("<MouseWheel>", self._on_mousewheel)
+            self.scroll_frame.bind("<Button-4>", self._on_mousewheel_linux)
+            self.scroll_frame.bind("<Button-5>", self._on_mousewheel_linux)
+
+    def _on_mousewheel(self, event):
+        """Handle Windows mouse wheel scrolling."""
+        try:
+            # Get the internal canvas if available
+            try:
+                canvas = self.scroll_frame._canvas
+            except AttributeError:
+                return
+
+            # Scroll the canvas
+            delta = -1 * (event.delta // 120)
+            canvas.yview_scroll(delta, "units")
+        except Exception as e:
+            logger.debug(f"Mouse wheel event failed: {e}")
+
+    def _on_mousewheel_linux(self, event):
+        """Handle Linux mouse wheel scrolling."""
+        try:
+            # Get the internal canvas if available
+            try:
+                canvas = self.scroll_frame._canvas
+            except AttributeError:
+                return
+
+            # Linux mouse wheel (button 4 = up, button 5 = down)
+            if event.num == 4:
+                delta = -1
+            elif event.num == 5:
+                delta = 1
+            else:
+                return
+
+            canvas.yview_scroll(delta, "units")
+        except Exception as e:
+            logger.debug(f"Linux mouse wheel event failed: {e}")
 
     def load_profiles(self):
         """Load and display all profiles."""
@@ -80,11 +146,13 @@ class ProfileListWidget(ctk.CTkFrame):
             active_profile = self.profile_service.get_active_profile()
 
             # Create profile item for each profile
-            for profile in self.profiles:
+            for i, profile in enumerate(self.profiles):
+                logger.info(f"Creating profile item {i+1}/{len(self.profiles)}: {profile.name}")
                 profile_frame = self._create_profile_item(profile, active_profile)
                 self.profile_frames.append(profile_frame)
+                logger.info(f"Created profile frame for {profile.name}: {profile_frame}")
 
-            logger.info(f"Loaded {len(self.profiles)} profiles")
+            logger.info(f"Loaded {len(self.profiles)} profiles, created {len(self.profile_frames)} frames")
 
         except Exception as e:
             logger.error(f"Failed to load profiles: {e}")
@@ -103,7 +171,10 @@ class ProfileListWidget(ctk.CTkFrame):
         """
         # Main frame for profile item
         item_frame = ctk.CTkFrame(self.scroll_frame)
+        logger.info(f"Created frame for profile {profile.name}")
+
         item_frame.pack(fill="x", padx=5, pady=3)
+        logger.info(f"Packed frame for profile {profile.name}")
 
         # Configure frame appearance based on active status
         if profile.is_active:

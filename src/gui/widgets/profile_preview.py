@@ -8,9 +8,9 @@ import customtkinter as ctk
 from typing import Optional, Dict, Any
 import json
 
-from ...models.profile import Profile
-from ...services.validation_service import ValidationService
-from ...utils.logger import get_logger
+from models.profile import Profile
+from services.validation_service import ValidationService
+from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -149,9 +149,6 @@ class ProfilePreviewDialog(ctk.CTkToplevel):
         )
         self.json_text.pack(side="left", fill="both", expand=True)
 
-        # Configure syntax highlighting
-        self._setup_syntax_highlighting()
-
         # Validation and info frame
         info_frame = ctk.CTkFrame(main_frame)
         info_frame.pack(fill="x", pady=(0, 15))
@@ -211,15 +208,7 @@ class ProfilePreviewDialog(ctk.CTkToplevel):
         )
         close_button.pack(side="right", padx=15, pady=15)
 
-    def _setup_syntax_highlighting(self):
-        """Setup syntax highlighting for JSON."""
-        # Configure tags for different JSON elements
-        self.json_text.tag_configure("json_string", foreground=("#00a000", "#00ff00"))
-        self.json_text.tag_configure("json_number", foreground=("#0000ff", "#0080ff"))
-        self.json_text.tag_configure("json_boolean", foreground=("#ff0000", "#ff4040"))
-        self.json_text.tag_configure("json_null", foreground=("#808080", "#b0b0b0"))
-        self.json_text.tag_configure("json_key", foreground=("#000000", "#ffffff"), font=ctk.CTkFont(weight="bold"))
-        self.json_text.tag_configure("json_bracket", foreground=("#000000", "#ffffff"))
+    # Syntax highlighting removed - CustomTkinter CTkTextbox doesn't support tagging
 
     def _load_profile_data(self):
         """Load profile data into dialog."""
@@ -235,7 +224,6 @@ class ProfilePreviewDialog(ctk.CTkToplevel):
             # Display JSON
             self.json_text.insert("1.0", formatted_json)
             self._update_line_numbers()
-            self._apply_syntax_highlighting()
 
             # Perform basic validation
             self._show_validation_status()
@@ -255,67 +243,7 @@ class ProfilePreviewDialog(ctk.CTkToplevel):
         self.line_numbers.insert("1.0", line_numbers)
         self.line_numbers.configure(state="disabled")
 
-    def _apply_syntax_highlighting(self):
-        """Apply syntax highlighting to JSON content."""
-        # Clear existing tags
-        for tag in ["json_string", "json_number", "json_boolean", "json_null", "json_key", "json_bracket"]:
-            self.json_text.tag_remove(tag, "1.0", "end")
-
-        content = self.json_text.get("1.0", "end-1c")
-
-        try:
-            # Simple syntax highlighting
-            in_string = False
-            escape_next = False
-            i = 0
-
-            while i < len(content):
-                char = content[i]
-
-                if escape_next:
-                    escape_next = False
-                    i += 1
-                    continue
-
-                if char == '\\' and in_string:
-                    escape_next = True
-                    i += 1
-                    continue
-
-                if char == '"' and not escape_next:
-                    if in_string:
-                        # End of string
-                        self.json_text.tag_add("json_string", f"1.0+{i - self._get_string_length(content, i)}c", f"1.0+{i + 1}c")
-                        in_string = False
-                    else:
-                        # Start of string
-                        in_string = True
-                        self._string_start = i
-                elif not in_string:
-                    if char in '{}[],:':
-                        self.json_text.tag_add("json_bracket", f"1.0+{i}c", f"1.0+{i + 1}c")
-                    elif char in 'truefalsenull':
-                        # Handle keywords
-                        keyword = self._get_keyword_at_position(content, i)
-                        if keyword in ['true', 'false']:
-                            self.json_text.tag_add("json_boolean", f"1.0+{i}c", f"1.0+{i + len(keyword)}c")
-                            i += len(keyword) - 1
-                        elif keyword == 'null':
-                            self.json_text.tag_add("json_null", f"1.0+{i}c", f"1.0+{i + len(keyword)}c")
-                            i += len(keyword) - 1
-                    elif char.isnumeric() or (char == '-' and i + 1 < len(content) and content[i + 1].isnumeric()):
-                        # Number
-                        start = i
-                        while i < len(content) and (content[i].isnumeric() or content[i] == '.' or content[i] == '-'):
-                            i += 1
-                        self.json_text.tag_add("json_number", f"1.0+{start}c", f"1.0+{i}c")
-                        continue
-
-                i += 1
-
-        except Exception:
-            # If syntax highlighting fails, continue without it
-            pass
+    # Syntax highlighting methods removed - CustomTkinter doesn't support tagging
 
     def _get_string_length(self, content, current_pos):
         """Get the length of the current string."""

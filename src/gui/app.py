@@ -62,7 +62,8 @@ class Application(ctk.CTk):
         # Put path info in window title
         self.title(f"Claude Code Config Switcher - {self.claude_config_path}")
         self.geometry(f"{self.app_config.window_width}x{self.app_config.window_height}")
-        self.minsize(600, 400)
+        # Set minimum size to accommodate all buttons (wider to fit button labels with shortcuts)
+        self.minsize(800, 400)
 
         # Set theme
         theme = self.app_config.theme.lower()
@@ -75,6 +76,37 @@ class Application(ctk.CTk):
 
         # Handle window close
         self.protocol("WM_DELETE_WINDOW", self._on_closing)
+
+        # Setup keyboard shortcuts
+        self._setup_keyboard_shortcuts()
+
+    def _setup_keyboard_shortcuts(self):
+        """Setup keyboard shortcuts for common actions."""
+        # Ctrl+N: New/Create Profile
+        self.bind('<Control-n>', lambda e: self._create_profile())
+
+        # Ctrl+E: Edit Profile
+        self.bind('<Control-e>', lambda e: self._edit_profile())
+
+        # Delete: Delete Profile
+        self.bind('<Delete>', lambda e: self._delete_profile())
+
+        # Ctrl+D: Duplicate Profile
+        self.bind('<Control-d>', lambda e: self._duplicate_profile())
+
+        # F5 or Ctrl+R: Refresh
+        self.bind('<F5>', lambda e: self._refresh_profiles())
+        self.bind('<Control-r>', lambda e: self._refresh_profiles())
+
+        # Ctrl+,: Settings (common shortcut for settings)
+        self.bind('<Control-comma>', lambda e: self._show_settings_dialog())
+
+        # Ctrl+Q: Quit
+        self.bind('<Control-q>', lambda e: self._on_closing())
+
+        # Alt+F4 is handled by OS
+
+        logger.debug("Keyboard shortcuts initialized")
 
     def _create_widgets(self):
         """Create main window widgets."""
@@ -96,7 +128,7 @@ class Application(ctk.CTk):
         # Create profile button
         self.create_button = ctk.CTkButton(
             self.action_frame,
-            text="Create Profile",
+            text="Create Profile (Ctrl+N)",
             command=self._create_profile
         )
         self.create_button.grid(row=0, column=0, padx=1, pady=1)
@@ -104,7 +136,7 @@ class Application(ctk.CTk):
         # Edit profile button
         self.edit_button = ctk.CTkButton(
             self.action_frame,
-            text="Edit Profile",
+            text="Edit Profile (Ctrl+E)",
             command=self._edit_profile,
             state="disabled"
         )
@@ -113,7 +145,7 @@ class Application(ctk.CTk):
         # Delete profile button
         self.delete_button = ctk.CTkButton(
             self.action_frame,
-            text="Delete Profile",
+            text="Delete Profile (Del)",
             command=self._delete_profile,
             state="disabled"
         )
@@ -122,7 +154,7 @@ class Application(ctk.CTk):
         # Duplicate profile button
         self.duplicate_button = ctk.CTkButton(
             self.action_frame,
-            text="Duplicate Profile",
+            text="Duplicate (Ctrl+D)",
             command=self._duplicate_profile,
             state="disabled"
         )
@@ -131,7 +163,7 @@ class Application(ctk.CTk):
         # Refresh button
         self.refresh_button = ctk.CTkButton(
             self.action_frame,
-            text="Refresh",
+            text="Refresh (F5)",
             command=self._refresh_profiles
         )
         self.refresh_button.grid(row=0, column=4, padx=1, pady=1)
@@ -139,8 +171,8 @@ class Application(ctk.CTk):
         # Settings button
         self.settings_button = ctk.CTkButton(
             self.action_frame,
-            text="⚙️",
-            width=25,
+            text="⚙️ Settings",
+            width=80,
             command=self._show_settings_dialog
         )
         self.settings_button.grid(row=0, column=5, padx=1, pady=1)

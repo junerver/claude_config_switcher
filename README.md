@@ -212,6 +212,22 @@ Click the gear icon to configure:
 - **Theme**: Choose light or dark mode
 - **Logging**: Set log level and output location
 
+### Keyboard Shortcuts
+
+The application supports the following keyboard shortcuts for faster workflow:
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+N` | Create new profile |
+| `Ctrl+E` | Edit selected profile |
+| `Del` | Delete selected profile |
+| `Ctrl+D` | Duplicate selected profile |
+| `F5` or `Ctrl+R` | Refresh profile list |
+| `Ctrl+,` | Open settings dialog |
+| `Ctrl+Q` | Quit application |
+
+**Note**: All shortcuts are also displayed in the button labels for easy reference.
+
 ## Development
 
 ### Project Structure

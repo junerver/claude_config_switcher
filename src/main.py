@@ -4,10 +4,19 @@ GUI entry point for the Claude Code Configuration Switcher.
 
 import argparse
 import sys
+import os
 from pathlib import Path
 
-# Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
+# Handle PyInstaller frozen executable paths
+if getattr(sys, 'frozen', False):
+    # Running as compiled executable
+    bundle_dir = sys._MEIPASS
+else:
+    # Running as script
+    bundle_dir = Path(__file__).parent
+
+# Add bundle dir to path for imports
+sys.path.insert(0, str(bundle_dir))
 
 from utils.logger import setup_logging
 from utils.paths import detect_claude_config_path

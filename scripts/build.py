@@ -8,6 +8,11 @@ import shutil
 import subprocess
 from pathlib import Path
 
+# Fix encoding for Windows console
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 def run_command(cmd, cwd=None):
     """Run a command and return the result."""
     print(f"Running: {' '.join(cmd)}")
@@ -38,25 +43,40 @@ def build_executable():
     if build_dir.exists():
         shutil.rmtree(build_dir)
 
-    # PyInstaller command
+    # PyInstaller command (Windows uses semicolon for --add-data)
+    separator = ";" if sys.platform == "win32" else ":"
+
     cmd = [
         "uv", "run", "pyinstaller",
         "--name=ClaudeConfigSwitcher",
         "--onefile",
         "--windowed",  # No console window for GUI app
-        "--add-data=src;src",
+        # Add all Python packages from src
+        f"--add-data=src/utils{separator}utils",
+        f"--add-data=src/models{separator}models",
+        f"--add-data=src/services{separator}services",
+        f"--add-data=src/storage{separator}storage",
+        f"--add-data=src/gui{separator}gui",
+        # Hidden imports for CustomTkinter and standard libraries
         "--hidden-import=customtkinter",
         "--hidden-import=tkinter",
         "--hidden-import=tkinter.scrolledtext",
         "--hidden-import=tkinter.simpledialog",
         "--hidden-import=tkinter.messagebox",
         "--hidden-import=tkinter.filedialog",
-        "--icon=assets/icons/app.ico" if (project_root / "assets/icons/app.ico").exists() else "",
+        "--hidden-import=logging",
+        "--hidden-import=logging.handlers",
+        "--hidden-import=sqlite3",
+        # Collect all CustomTkinter resources
+        "--collect-all=customtkinter",
+        # Main entry point
         "src/main.py"
     ]
 
-    # Remove empty icon parameter
-    cmd = [arg for arg in cmd if arg != ""]
+    # Add icon if it exists
+    icon_path = project_root / "assets" / "icons" / "app.ico"
+    if icon_path.exists():
+        cmd.insert(-1, f"--icon={icon_path}")
 
     print(f"Build command: {' '.join(cmd)}")
     result = run_command(cmd)

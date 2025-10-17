@@ -143,7 +143,47 @@ The application searches for Claude Code configuration in:
 
 Users can override this path in the settings dialog.
 
-## CLI Interface Examples
+## Usage Instructions
+
+### GUI Mode
+
+#### Starting the Application
+```bash
+uv run python src/main.py
+```
+
+#### Creating a New Profile
+1. Click the **"Create Profile"** button at the bottom of the window
+2. Enter a descriptive profile name (e.g., "Production", "Development", "Testing")
+3. Paste your Claude Code JSON configuration in the text area
+4. Click **"Save"** to create the profile
+
+#### Switching Profiles
+- **Double-click** any profile in the list to activate it
+- The application will:
+  - Create an automatic backup of your current Claude Code settings
+  - Apply the selected profile configuration
+  - Show a success message when complete
+- The active profile is marked with a **✓ checkmark** and **green border**
+
+#### Managing Profiles
+- **Select a profile**: Single-click to highlight (shows **blue border**)
+- **Right-click** for context menu options:
+  - **Preview Profile**: View the full JSON configuration
+  - **Activate Profile**: Apply this profile to Claude Code
+  - **Edit Profile**: Modify the profile name or configuration
+  - **Duplicate Profile**: Create a copy with a new name
+  - **Delete Profile**: Remove the profile (with confirmation)
+
+#### Visual Indicators
+- **Green border + ✓**: Currently active profile
+- **Blue border**: Selected profile
+- **Gray border**: Inactive profiles
+
+#### Mouse Wheel Scrolling
+- Use your **mouse wheel** to scroll through the profile list when you have many profiles
+
+### CLI Interface Examples
 
 ```bash
 # List profiles
@@ -161,6 +201,23 @@ uv run python src/cli.py config status
 # Create backup
 uv run python src/cli.py config backup
 ```
+
+### Common Workflows
+
+#### Setting Up Multiple Environments
+1. Create a profile for each environment (Production, Staging, Development)
+2. Store different API keys and base URLs in each profile
+3. Switch between them with a double-click
+
+#### Testing Different Models
+1. Create profiles for different Claude models (Opus, Sonnet, Haiku)
+2. Adjust temperature and max_tokens for each use case
+3. Quickly switch to test different configurations
+
+#### Managing API Providers
+1. Create profiles for different API providers (Anthropic, custom proxies)
+2. Store different ANTHROPIC_BASE_URL values
+3. Switch providers without manual file editing
 
 ## Future Enhancements (Not in MVP)
 

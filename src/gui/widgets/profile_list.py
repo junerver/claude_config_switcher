@@ -169,16 +169,25 @@ class ProfileListWidget(ctk.CTkFrame):
         Returns:
             Profile item frame
         """
-        # Main frame for profile item
-        item_frame = ctk.CTkFrame(self.scroll_frame)
+        # Main frame for profile item with border effect
+        item_frame = ctk.CTkFrame(
+            self.scroll_frame,
+            corner_radius=8,
+            border_width=2
+        )
         logger.info(f"Created frame for profile {profile.name}")
 
-        item_frame.pack(fill="x", padx=5, pady=3)
+        # Increased vertical padding for better separation
+        item_frame.pack(fill="x", padx=8, pady=6)
         logger.info(f"Packed frame for profile {profile.name}")
 
         # Configure frame appearance based on active status
         if profile.is_active:
-            item_frame.configure(fg_color=("#2b2b2b", "#212121"))  # Highlight active
+            # Active profile: green border and subtle background
+            item_frame.configure(
+                fg_color=("#1a4d2e", "#0f3a1f"),
+                border_color=("#22c55e", "#16a34a")
+            )
 
         # Profile info frame
         info_frame = ctk.CTkFrame(item_frame)
@@ -288,15 +297,38 @@ class ProfileListWidget(ctk.CTkFrame):
 
     def _select_profile(self, profile: Profile):
         """Handle profile selection."""
-        # Clear previous selection
-        for frame in self.profile_frames:
-            frame.configure(fg_color="transparent")
+        # Clear previous selection - reset all frames to default state
+        for i, p in enumerate(self.profiles):
+            if i < len(self.profile_frames) and self.profile_frames[i].winfo_exists():
+                if p.is_active:
+                    # Active profile: green border and subtle background
+                    self.profile_frames[i].configure(
+                        fg_color=("#1a4d2e", "#0f3a1f"),
+                        border_color=("#22c55e", "#16a34a")
+                    )
+                else:
+                    # Inactive profile: no highlight, use default theme color for border
+                    self.profile_frames[i].configure(
+                        fg_color="transparent",
+                        border_color=("#3a3a3a", "#2b2b2b")
+                    )
 
-        # Highlight selected profile
+        # Highlight selected profile with blue border
         for i, p in enumerate(self.profiles):
             if p.id == profile.id:
-                if self.profile_frames[i].winfo_exists():
-                    self.profile_frames[i].configure(fg_color=("#3b3b3b", "#2a2a2a"))
+                if i < len(self.profile_frames) and self.profile_frames[i].winfo_exists():
+                    if p.is_active:
+                        # Selected + Active: both green background and blue border
+                        self.profile_frames[i].configure(
+                            fg_color=("#1a4d2e", "#0f3a1f"),
+                            border_color=("#3b82f6", "#2563eb")
+                        )
+                    else:
+                        # Selected only: blue border and light background
+                        self.profile_frames[i].configure(
+                            fg_color=("#1e3a5f", "#172a46"),
+                            border_color=("#3b82f6", "#2563eb")
+                        )
                 break
 
         self.selected_profile = profile
